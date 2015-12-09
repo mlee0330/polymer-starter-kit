@@ -1,0 +1,97 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="pie-status">
+  <template>
+    <div id="holder">
+      <style include="shared-styles"></style>
+      <style>
+        :host {
+          display: block;
+        }
+      </style>
+      <h2 class="page-title"><span>{{greeting}}</span></h2>
+    </div>
+  </template>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script>
+    'use strict';
+
+    var username = 'Mike';
+    Polymer({
+      is: 'pie-status',
+      properties: {
+        greeting: {
+          type: String,
+          value: 'Welcome back ' + username + '!',
+          notify: true
+        }
+      },
+      ready: function() {
+        // Get the calculated styles of the paper-material container
+        // window.addEventListener('load', function () {
+        // // var box = document.getElementsByClassName('x-scope paper-material-0')[0];
+        // var box = document.getElementsByTagName('PAPER-MATERIAL');
+        // console.log(box, 'this is the box')
+        // var styles = window.getComputedStyle(box);
+        // console.log(styles.width, 'this is the width');
+        // });  
+
+
+        // window.addEventListener('load', function () {
+        //   var host = document.querySelector('pie-status');
+        //   console.log(host, 'this is the host')
+        //   var root = host.createShadowRoot();
+        //   console.log(root, 'this is the root')
+        // });        
+
+
+
+        var data = [8, 13, 21, 34, 55, 89];
+
+        var width = 960,
+            height = 500;
+        var outerRadius = height / 2 -20 ,
+            innerRadius = outerRadius / 3,
+            cornerRadius = 10;
+        var pie = d3.layout.pie()
+            .padAngle(.02);
+        var arc = d3.svg.arc()
+            .padRadius(outerRadius)
+            .innerRadius(innerRadius);
+        var svg = d3.select(this.$.holder).append("svg")
+            .attr("width", width)
+            .attr("height", height)
+          .append("g")
+            .attr("transform", "translate(" + width / 4 + "," + height / 2 + ")");
+        svg.selectAll("path")
+            .data(pie(data))
+          .enter().append("path")
+            .each(function(d) { d.outerRadius = outerRadius; })
+            .attr("d", arc)
+            .on("mouseover", arcTween(outerRadius - 20, 0))
+            .on("mouseout", arcTween(outerRadius, 150));
+        function arcTween(outerRadius, delay) {
+          return function() {
+            d3.select(this).transition().delay(delay).attrTween("d", function(d) {
+              var i = d3.interpolate(d.outerRadius, outerRadius);
+              return function(t) { d.outerRadius = i(t); return arc(d); };
+            });
+          };
+        }
+
+
+      }
+    });
+  </script>
+
+
+</dom-module>
